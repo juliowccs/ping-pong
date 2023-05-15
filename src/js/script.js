@@ -48,7 +48,7 @@ const canvasElement = document.querySelector("canvas"),
         score0: 3,
         score1: 4,
         draw: function() {
-            canvasCtx.font = "bold 50px Poppins"
+            canvasCtx.font = "bold 50px sans-serif"
             canvasCtx.textAlign = "center"
             canvasCtx.textBaseline = "top"
             canvasCtx.fillText(score.score0, window.innerWidth / 4, 10)

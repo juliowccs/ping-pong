@@ -11,11 +11,13 @@ const canvasElement = document.querySelector("canvas"),
     },
     
     line = {
-        w: window.innerWidth / 2 - lineWidth / 2,
+        x: window.innerWidth / 2 - lineWidth / 2,
+        y: 0,
+        w: lineWidth,
         h: field.h,
         
         draw: function() {
-            canvasCtx.fillRect(line.w, 0, lineWidth, line.h
+            canvasCtx.fillRect(this.x, this.y, this.w, this.h
             )
         }
     },
@@ -23,25 +25,64 @@ const canvasElement = document.querySelector("canvas"),
         x:200,
         y:300,
         r:20,
+        spd:5,
+        _move: function() {
+            this.x += 1 * this.spd
+            this.y += 1 * this.spd
+        },
         draw: function() {
             canvasCtx.beginPath()
             canvasCtx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false)
             canvasCtx.fill()
+
+            this._move()
         }
     },
-    raqueteLeft = {
+    paddleLeft = {
+        x: 5,
+        y: 200,
         w:lineWidth,
-        h:150,
+        h: 150,
+        spd: 10,
+        _move: function() {
+            // this.y = mouse.y - this.h / 2
+            if (keys["w"]) {
+                if (this.y > 10) {
+                    this.y -= this.spd
+                }
+            }
+            if (keys["s"]) {
+                if (this.y < 430) {
+                    this.y += this.spd
+                }
+            }
+        },
         draw: function() {
-            canvasCtx.fillRect(5, 200, raqueteLeft.w, raqueteLeft.h)
+            canvasCtx.fillRect(this.x, this.y, this.w, this.h)
+            this._move()
         }
     },
-    raqueteRight = {
-        w:window.innerWidth- lineWidth - lineWidth / 2,
-        h:raqueteLeft.h,
+    paddleRight = {
+        x: window.innerWidth- lineWidth - lineWidth / 2,
+        y: 200,
+        w: lineWidth,
+        h:paddleLeft.h,
+        spd:10,
+        _move: function() {
+            if (keys["ArrowUp"]) {
+                if (this.y > 10) {
+                    this.y -= this.spd
+                }
+            }
+            if (keys["ArrowDown"]) {
+                if (this.y < 430) {
+                    this.y += this.spd
+                }
+            }
+        },
         draw: function() {
-            canvasCtx.fillRect(
-                raqueteRight.w, 200, lineWidth, raqueteRight.h)
+            canvasCtx.fillRect(this.x, this.y, this.w, this.h)
+            this._move()
         }
     },
     score = {
@@ -55,6 +96,12 @@ const canvasElement = document.querySelector("canvas"),
             canvasCtx.fillText(score.score1, window.innerWidth / 4 + window.innerWidth / 2, 10)
         }
     }
+    // mouse = {
+    //     x: 0,
+    //     y: 0
+    // }
+let keys = {};
+
 function setup() {
     canvasElement.width = canvasCtx.width = field.w
     canvasElement.height = canvasCtx.height = field.h
@@ -63,19 +110,51 @@ function setup() {
 function draw() {
     //desenho geral
     field.draw()
-
+    //cor secundária
     canvasCtx.fillStyle = "#fff"
     //desenho divisoria
     line.draw()
     //raquete esquerda    
-    raqueteLeft.draw()
+    paddleLeft.draw()
     //raquete direita
-    raqueteRight.draw()
+    paddleRight.draw()
     //bola
     ball.draw()
     //placar
     score.draw()
 }
 
-setup()
-draw()
+window.animateFrame = (function() {
+    return(
+        window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function(callback) {
+        return window.setTimeout(callback, 1000 / 60);
+        }
+    )
+})();
+  
+function main() {
+    animateFrame(main);
+    draw();
+}
+
+setup();
+main();
+
+// canvasElement.addEventListener('mousemove', function(e){
+//     mouse.x = e.pageX
+//     mouse.y = e.pageY
+
+//     console.log(mouse)
+// })
+
+document.addEventListener("keydown", function(e) {
+    keys[e.key] = true;
+});
+document.addEventListener("keyup", function(e) {
+    keys[e.key] = false;
+});

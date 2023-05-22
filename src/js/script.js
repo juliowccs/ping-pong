@@ -22,19 +22,61 @@ const canvasElement = document.querySelector("canvas"),
         }
     },
     ball = {
-        x:200,
-        y:300,
+        x:0,
+        y:0,
         r:20,
-        spd:5,
+        spd:15,
+        directionX: 1,
+        directionY: 1,
+        _calcPosition: function () {
+            if (
+                (this.y - this.r < 0 && this.directionY < 0) ||
+                (this.y > field.h - this.r && this.directionY > 0)
+            ) {
+                this.__reverseY()
+            }
+            if (this.x > field.w - paddleRight.w -this.r && this.directionX > 0) {
+                if (
+                    (this.y + this.r > paddleRight.y) &&
+                    (this.y - this.r < paddleRight.y + paddleRight.h)
+                ) {
+                    this.__reverseX();
+                } else {
+                    score.increasePlayer1();
+                }
+            }
+            if (this.x < 0 + paddleLeft.w + this.r && this.directionX < 0) {
+                if (
+                    (this.y + this.r > paddleLeft.y) && 
+                    (this.y - this.r < paddleLeft.y + paddleLeft.h)
+                )   {
+                    this.__reverseX()
+                }
+                else [
+                    score.increasePlayer2()
+                ]
+            }
+        },
+        __reverseX: function() {
+            this.directionX *= -1
+        },
+        __reverseY: function() {
+            this.directionY *= -1
+        },
+        __scoreUp: function() {
+            this.x = field.w / 2
+            this.y = field.h / 2
+        },
         _move: function() {
-            this.x += 1 * this.spd
-            this.y += 1 * this.spd
+            this.x += this.directionX * this.spd
+            this.y += this.directionY * this.spd
         },
         draw: function() {
             canvasCtx.beginPath()
             canvasCtx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false)
             canvasCtx.fill()
 
+            this._calcPosition()
             this._move()
         }
     },
@@ -43,7 +85,7 @@ const canvasElement = document.querySelector("canvas"),
         y: 200,
         w:lineWidth,
         h: 150,
-        spd: 10,
+        spd: 15,
         _move: function() {
             // this.y = mouse.y - this.h / 2
             if (keys["w"]) {
@@ -52,7 +94,7 @@ const canvasElement = document.querySelector("canvas"),
                 }
             }
             if (keys["s"]) {
-                if (this.y < 430) {
+                if (this.y < window.innerHeight - this.h - 10) {
                     this.y += this.spd
                 }
             }
@@ -67,7 +109,7 @@ const canvasElement = document.querySelector("canvas"),
         y: 200,
         w: lineWidth,
         h:paddleLeft.h,
-        spd:10,
+        spd:15,
         _move: function() {
             if (keys["ArrowUp"]) {
                 if (this.y > 10) {
@@ -75,7 +117,7 @@ const canvasElement = document.querySelector("canvas"),
                 }
             }
             if (keys["ArrowDown"]) {
-                if (this.y < 430) {
+                if (this.y < window.innerHeight - this.h - 10) {
                     this.y += this.spd
                 }
             }
@@ -86,14 +128,23 @@ const canvasElement = document.querySelector("canvas"),
         }
     },
     score = {
-        score0: 3,
-        score1: 4,
+        score0: 0,
+        score1: 0,
+        increasePlayer1: function() {
+            this.score0 = this.score0 + 1
+            ball.__scoreUp()
+        },
+        increasePlayer2: function() {
+            this.score1 = this.score1 + 1
+            ball.__scoreUp()
+        },
         draw: function() {
             canvasCtx.font = "bold 50px sans-serif"
             canvasCtx.textAlign = "center"
             canvasCtx.textBaseline = "top"
             canvasCtx.fillText(score.score0, window.innerWidth / 4, 10)
             canvasCtx.fillText(score.score1, window.innerWidth / 4 + window.innerWidth / 2, 10)
+            canvasCtx.fillText("Ping Pong", window.innerWidth / 2 + 7, 10)
         }
     }
     // mouse = {
